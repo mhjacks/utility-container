@@ -5,7 +5,7 @@ PFX=context/bin
 ee: download
 	ansible-builder build --tag=hybridcloudpatterns-utility-ee
 
-download: clean bin oc argocd helm azuretrim
+download: clean bin oc argocd helm azuretrim yq
 
 argocd:
 	curl -sSL -o $(PFX)/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
