@@ -15,10 +15,12 @@ helm:
 	curl -sSL -o $(PFX)/helm https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/helm/latest/helm-linux-amd64
 	chmod 755 $(PFX)/helm
 
+# We'll symlink kubectl in the container build process
 oc:
 	curl -sLfO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$(OPENSHIFT_CLIENT_VERSION)/openshift-client-linux-$(OPENSHIFT_CLIENT_VERSION).tar.gz
 	tar xvf openshift-client-linux-$(OPENSHIFT_CLIENT_VERSION).tar.gz -C $(PFX)
 	rm -rf openshift-client-linux-$(OPENSHIFT_CLIENT_VERSION).tar.gz
+	rm -f $(PFX)/kubectl
 	rm -f $(PFX)/README.md
 
 azuretrim:
