@@ -13,7 +13,7 @@ dependencies:
 
 additional_build_steps:
   prepend: |
-    RUN whoami
+    LABEL maintainer Validated Patterns <team-validated-patterns@redhat.com>
     RUN cat /etc/os-release
   append:
     - COPY bin/* /usr/local/bin
