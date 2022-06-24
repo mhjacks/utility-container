@@ -1,0 +1,21 @@
+---
+version: 1
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
+
+ansible_config: 'ansible.cfg'
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_steps:
+  prepend: |
+    RUN whoami
+    RUN cat /etc/os-release
+  append:
+    - COPY bin/* /usr/local/bin
+    - RUN ln -sf /usr/local/bin/oc /usr/local/bin/kubectl
+    - RUN pip3 install humanize && azure_sdk_trim.py && /usr/local/bin/azure_sdk_trim.py && pip3 uninstall -y humanize
