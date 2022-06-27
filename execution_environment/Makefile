@@ -2,6 +2,9 @@ OPENSHIFT_CLIENT_VERSION=4.10.3
 TKN_VERSION=0.24.0
 YQ_VERSION=4.25.3
 KUSTOMIZE_VERSION=4.5.5
+ARGOCD_VERSION=0.24.2
+HELM_VERSION=3.7.1
+
 PFX=context/bin
 
 ee: download
@@ -10,11 +13,11 @@ ee: download
 download: clean bin oc argocd helm azuretrim yq tkn kustomize
 
 argocd:
-	curl -sSL -o $(PFX)/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+	curl -sSL -o $(PFX)/argocd https://github.com/argoproj/argo-cd/v$(ARGOCD_VERSION)/argocd-linux-amd64
 	chmod 755 $(PFX)/argocd
 
 helm:
-	curl -sSL -o $(PFX)/helm https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/helm/latest/helm-linux-amd64
+	curl -sSL -o $(PFX)/helm https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/helm/v$(HELM_VERSION)/helm-linux-amd64
 	chmod 755 $(PFX)/helm
 
 kustomize:
