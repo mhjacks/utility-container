@@ -54,4 +54,4 @@ clean:
 	rm -rf $(PFX)
 
 bin:
-	mkdir $(PFX)
+	mkdir -p $(PFX)
