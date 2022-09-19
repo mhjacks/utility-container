@@ -27,6 +27,6 @@ additional_build_steps:
     # argocd
     - RUN curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.4.2/argocd-linux-amd64 && chmod 755 /usr/local/bin/argocd
     # tkn
-    - RUN curl -sLfO https://github.com/tektoncd/cli/releases/download/v0.24.0/tkn_0.24.0_Linux_x86_64.tar.gz && tar xvf tkn_0.24.0_Linux_x86_64.tar.gz -C /usr/local/bin --no-same-owner && chmod 755 /usr/local/bin/tkn
+    - RUN curl -sLfO https://github.com/tektoncd/cli/releases/download/v0.24.0/tkn_0.24.0_Linux_x86_64.tar.gz && tar xvf tkn_0.24.0_Linux_x86_64.tar.gz -C /usr/local/bin --no-same-owner && chmod 755 /usr/local/bin/tkn && rm -f /usr/local/bin/README.md && rm -f /usr/local/bin/LICENSE
     # Trim azure install
     - RUN curl -sSL -o /usr/local/bin/azure_sdk_trim.py https://raw.githubusercontent.com/clumio-code/azure-sdk-trim/main/azure_sdk_trim/azure_sdk_trim.py && chmod 755 /usr/local/bin/azure_sdk_trim.py && /usr/local/bin/azure_sdk_trim.py && pip3 uninstall -y humanize
