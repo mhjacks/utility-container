@@ -4,11 +4,8 @@ utility container for simplified execution of imperative commands in each of the
 
 This container is built as an Ansible Execution Environment, which is usable as such.
 
-The tag used on the image represents the `oc` client version installed. <br/>
-For example: `quay.io/hybrid-cloud-patterns/utility-container:stable-4.10.3` means that the openshift client (oc) version is `4.10.3`
-
 ```bash
-$ podman run quay.io/hybrid-cloud-patterns/utility-container:stable-4.10.3` oc version 
+$ podman run quay.io/hybrid-cloud-patterns/utility-container` oc version 
 Client Version: 4.10.3
 ```
 
@@ -23,6 +20,7 @@ The image is based on UBI, and adds some RHEL content, installs some additional 
 |    make     | package |
 |    gawk     | package |
 |     jq      | package |
+|    tar      | package |
 |   argocd    | binary  |
 |    tkn      | binary  |
 |     yq      | binary  |
@@ -71,6 +69,6 @@ podman run -it \
     -v ${HOME}:${HOME} \
     -v ${HOME}:/root \
     -w $(pwd) \
-    quay.io/hybrid-cloud-patterns/utility-container:stable-4.10.3 \
+    quay.io/hybrid-cloud-patterns/utility-container:latest \
     make install
 ```
