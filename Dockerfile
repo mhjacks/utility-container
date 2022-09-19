@@ -1,1 +1,0 @@
-execution_environment/context/Containerfile
