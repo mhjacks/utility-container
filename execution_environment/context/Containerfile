@@ -1,0 +1,40 @@
+ARG EE_BASE_IMAGE=quay.io/ansible/ansible-runner:latest
+ARG EE_BUILDER_IMAGE=quay.io/ansible/ansible-builder:latest
+
+FROM $EE_BASE_IMAGE as galaxy
+ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS=-v
+USER root
+
+ADD _build/ansible.cfg ~/.ansible.cfg
+
+ADD _build /build
+WORKDIR /build
+
+RUN ansible-galaxy role install -r requirements.yml --roles-path "/usr/share/ansible/roles"
+RUN ANSIBLE_GALAXY_DISABLE_GPG_VERIFY=1 ansible-galaxy collection install $ANSIBLE_GALAXY_CLI_COLLECTION_OPTS -r requirements.yml --collections-path "/usr/share/ansible/collections"
+
+FROM $EE_BUILDER_IMAGE as builder
+
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
+
+ADD _build/requirements.txt requirements.txt
+ADD _build/bindep.txt bindep.txt
+RUN ansible-builder introspect --sanitize --user-pip=requirements.txt --user-bindep=bindep.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
+RUN assemble
+
+FROM $EE_BASE_IMAGE
+USER root
+LABEL maintainer Validated Patterns <team-validated-patterns@redhat.com>
+RUN cat /etc/os-release
+
+COPY --from=galaxy /usr/share/ansible /usr/share/ansible
+
+COPY --from=builder /output/ /output/
+RUN /output/install-from-bindep && rm -rf /output/wheels
+RUN curl -L https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -xvzf - -C /usr/local/bin/ oc && chmod 755 /usr/local/bin/oc && ln -s /usr/local/bin/oc /usr/local/bin/kubectl
+RUN curl -sSL -o /usr/local/bin/helm https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/helm/3.7.1/helm-linux-amd64 && chmod 755 /usr/local/bin/helm
+RUN curl -sLfO https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz && tar xvf kustomize_v4.5.5_linux_amd64.tar.gz -C /usr/local/bin && rm -f kustomize_v4.5.5_linux_amd64.tar.gz && chmod 755 /usr/local/bin/kustomize
+RUN curl -sSL -o /usr/local/bin/yq  https://github.com/mikefarah/yq/releases/download/v4.25.3/yq_linux_amd64 && chmod 755 /usr/local/bin/yq
+RUN curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.4.2/argocd-linux-amd64 && chmod 755 /usr/local/bin/argocd
+RUN curl -sLfO https://github.com/tektoncd/cli/releases/download/v0.24.0/tkn_0.24.0_Linux_x86_64.tar.gz && tar xvf tkn_0.24.0_Linux_x86_64.tar.gz -C /usr/local/bin --no-same-owner && chmod 755 /usr/local/bin/tkn
+RUN pip3 install humanize && /usr/local/bin/azure_sdk_trim.py && pip3 uninstall -y humanize
