@@ -52,12 +52,12 @@ The image is based on UBI, and adds some RHEL content, installs some additional 
 ### Usage
 **Pull the image**
 ```bash
-podman pull quay.io/hybrid-cloud-patterns/utility-container:stable-4.10.3
+podman pull quay.io/hybrid-cloud-patterns/utility-container:latest
 ```
 
 **Use image to execute a playbook**
 ```bash
-podman run quay.io/hybrid-cloud-patterns:stable-4.10.3 ansible-playbook <playbook>.yml 
+podman run quay.io/hybrid-cloud-patterns:latest ansible-playbook <playbook>.yml 
 ```
 
 **Use the image to mimic the user's home directory for managing patterns
