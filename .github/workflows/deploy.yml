@@ -1,0 +1,102 @@
+# Workflow name
+name: EE build (reusable)
+
+
+# Controls when the workflow will run
+on:
+  # This is a reusable workflow
+  workflow_call:
+    inputs:
+      EE_FOLDER_NAME:
+        description: 'name of the folder where the EE is located (will become the name of the EE)'
+        default: ''
+        required: true
+        type: string
+      EE_IMAGE_TAG:
+        description: 'just one tag for image build'
+        default: 'latest'
+        required: true
+        type: string
+      QUAY_USER:
+        description: 'this is used during the image push to quay'
+        required: true
+        type: string
+    secrets:
+      REDHAT_PASSWORD:
+        description: 'needed for registry login'
+        required: false
+      REDHAT_USERNAME:
+        description: 'needed for registry login'
+        required: false
+      AH_TOKEN:
+        description: 'API token for hosted automation hub'
+        required: false
+      
+# env:
+#   ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN: ${{ secrets.AH_TOKEN }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  # This workflow contains a single job called "build"
+  build:
+    runs-on: ubuntu-latest
+    environment: deploy
+    steps:
+
+      # In this job, all steps begin with a name
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        
+      - name: Install python requirements (ansible-builder)
+        run: pip install -r requirements.txt
+
+      - name: Log in to quay.io
+        id: registry-quay
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.REDHAT_USERNAME }}
+          password: ${{ secrets.REDHAT_PASSWORD }}
+
+      - name: Log in to registry.redhat.io
+        id: registry-redhat
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: registry.redhat.io
+          username: ${{ secrets.REDHAT_USERNAME }}
+          password: ${{ secrets.REDHAT_PASSWORD }}
+          
+      - name: substitute token for automation hub
+        id: ah-token
+        run: |
+          sed -i "s/my_ah_token/$AH_TOKEN/1" ansible.cfg
+          cat ansible.cfg
+        env:
+          AH_TOKEN: ${{ secrets.AH_TOKEN }}
+
+      - name: Build image
+        id: build-image
+        working-directory: ${{ inputs.EE_FOLDER_NAME }}
+        run: |
+          ansible-builder build \
+          --tag=${{ inputs.EE_FOLDER_NAME }}:${{ inputs.EE_IMAGE_TAG }}
+#         env:
+#           ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN: ${{ secrets.AH_TOKEN }}
+           
+      - name: Push To quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ inputs.EE_FOLDER_NAME }}
+          tags: |
+            ${{ inputs.EE_IMAGE_TAG }}
+          registry: quay.io/${{ inputs.QUAY_USER }}/
+          username: ${{ secrets.REDHAT_USERNAME }}
+          password: ${{ secrets.REDHAT_PASSWORD }} 
+
+      - name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+        
+      - name: List installed collections
+        run: podman run ${{ inputs.EE_FOLDER_NAME }} ansible-galaxy collection list
