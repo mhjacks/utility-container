@@ -12,3 +12,5 @@ humanize
 pytz
 pytest
 vp-qe-test-common @ git+https://github.com/validatedpatterns/vp-qe-test-common.git@development#egg=vp-qe-test-common
+copier
+cookiecutter
